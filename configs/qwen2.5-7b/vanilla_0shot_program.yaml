@@ -1,5 +1,5 @@
-# Qwen3-8B: Vanilla (zero-shot), Program Synthesis
-model: "Qwen/Qwen3-8B"
+# Qwen2.5-7B: Vanilla (zero-shot), Program Synthesis
+model: "Qwen/Qwen2.5-7B-Instruct"
 prompt_type: "vanilla"
 output_program: true
 n_shots: 0

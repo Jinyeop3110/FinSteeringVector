@@ -1,7 +1,7 @@
-# Qwen3-8B: Few-shot (3 examples), Program Synthesis
-model: "Qwen/Qwen3-8B"
+# Qwen2.5-7B: Few-shot (3 examples), Direct Answer
+model: "Qwen/Qwen2.5-7B-Instruct"
 prompt_type: "few_shot"
-output_program: true
+output_program: false
 n_shots: 3
 max_samples: 256
 batch_size: 8

@@ -1,5 +1,5 @@
-# Qwen3-8B: Vanilla (zero-shot), Direct Answer
-model: "Qwen/Qwen3-8B"
+# Qwen2.5-7B: Vanilla (zero-shot), Direct Answer
+model: "Qwen/Qwen2.5-7B-Instruct"
 prompt_type: "vanilla"
 output_program: false
 n_shots: 0

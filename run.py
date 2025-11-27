@@ -249,6 +249,34 @@ def save_predictions(predictions: list[dict], output_path: str) -> None:
     logger.info(f"Predictions saved to {output_path}")
 
 
+def save_comparison_excel(predictions: list[dict], output_path: str) -> None:
+    """
+    Save minimal comparison Excel file.
+
+    Columns: id, question, gold_answer, predicted_answer, correct (1/0)
+    """
+    import pandas as pd
+
+    rows = []
+    for pred in predictions:
+        rows.append({
+            "id": pred.get("id", ""),
+            "question": pred.get("question", "")[:100],  # Truncate for readability
+            "gold_answer": pred.get("ground_truth", ""),
+            "predicted_answer": pred.get("prediction", ""),
+            "correct": int(pred.get("execution_accuracy", 0)),
+        })
+
+    df = pd.DataFrame(rows)
+    df.to_excel(output_path, index=False, engine="openpyxl")
+
+    # Summary stats
+    total = len(df)
+    correct = df["correct"].sum()
+    logger.info(f"Comparison Excel saved to {output_path}")
+    logger.info(f"  Total: {total}, Correct: {correct}, Accuracy: {correct/total:.4f}")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="FinQA Evaluation (following original benchmark)"
@@ -288,12 +316,11 @@ def main():
     )
     args = parser.parse_args()
 
-    # Load config if provided
+    # Load config if provided (config values override defaults)
     if args.config:
         config = load_config(args.config)
         for key, value in config.items():
-            if not hasattr(args, key) or getattr(args, key) is None:
-                setattr(args, key, value)
+            setattr(args, key, value)
 
     # Create session directory
     session_name = get_session_name(
@@ -365,6 +392,9 @@ def main():
     # Save results
     logger.info("Saving results...")
     save_predictions(predictions, str(output_dir / "predictions.json"))
+
+    # Comparison Excel
+    save_comparison_excel(predictions, str(output_dir / "comparison.xlsx"))
 
     # Metrics JSON
     with open(output_dir / "metrics.json", "w") as f:

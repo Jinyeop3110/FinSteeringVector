@@ -99,7 +99,8 @@ def execution_accuracy(
     FinQA execution accuracy metric (following original implementation).
 
     Compares values after rounding to 5 decimal places.
-    This matches the original FinQA evaluation exactly.
+    Also handles percentage/decimal format mismatches:
+    - If model outputs 14.6 (meaning 14.6%) and gold is 0.146, they should match
 
     Args:
         prediction: Model prediction (number or text containing number)
@@ -108,22 +109,52 @@ def execution_accuracy(
     Returns:
         1.0 if correct, 0.0 otherwise
     """
+    # Handle yes/no comparison first
+    pred_lower = str(prediction).strip().lower()
+    gt_lower = str(ground_truth).strip().lower()
+
+    # Check for yes/no in prediction text
+    if "yes" in pred_lower or "no" in pred_lower:
+        if gt_lower in ["yes", "no"]:
+            # Extract yes/no from prediction
+            if "yes" in pred_lower and "no" not in pred_lower:
+                return float(gt_lower == "yes")
+            elif "no" in pred_lower and "yes" not in pred_lower:
+                return float(gt_lower == "no")
+
+    if gt_lower in ["yes", "no"]:
+        return 0.0  # Gold is yes/no but prediction doesn't contain it
+
     pred_num = extract_number(prediction)
     gt_num = extract_number(ground_truth)
 
     if pred_num is None or gt_num is None:
-        # Handle yes/no comparison for greater operations
-        pred_lower = str(prediction).strip().lower()
-        gt_lower = str(ground_truth).strip().lower()
-        if pred_lower in ["yes", "no"] and gt_lower in ["yes", "no"]:
-            return float(pred_lower == gt_lower)
         return 0.0
 
     # Round to 5 decimal places (following original FinQA)
     pred_rounded = round(pred_num, 5)
     gt_rounded = round(gt_num, 5)
 
-    return float(pred_rounded == gt_rounded)
+    # Direct match
+    if pred_rounded == gt_rounded:
+        return 1.0
+
+    # Handle percentage/decimal format mismatch
+    # Case 1: Model outputs percentage form (e.g., 14.6) but gold is decimal (0.146)
+    # This happens when model outputs "14.6" meaning 14.6% without the % sign
+    if gt_num != 0 and 0 < abs(gt_num) < 1:  # Gold looks like a decimal percentage
+        pred_as_decimal = round(pred_num / 100, 5)
+        if pred_as_decimal == gt_rounded:
+            return 1.0
+
+    # Case 2: Model outputs decimal (0.146) but gold is percentage form (14.6)
+    # Less common but handle for completeness
+    if pred_num != 0 and 0 < abs(pred_num) < 1:
+        pred_as_percent = round(pred_num * 100, 5)
+        if pred_as_percent == gt_rounded:
+            return 1.0
+
+    return 0.0
 
 
 def program_accuracy(

@@ -1,7 +1,96 @@
 """Chain-of-thought prompt template for FinQA."""
 
-from typing import Optional
+import re
+from typing import Optional, List, Dict, Any
 from .base import BasePrompt, DSL_DESCRIPTION
+
+
+def parse_program(program: str) -> List[tuple]:
+    """Parse program into list of (operation, [args])"""
+    steps = []
+    parts = re.split(r',\s*(?=[a-z_]+\()', program)
+
+    for part in parts:
+        part = part.strip()
+        match = re.match(r'([a-z_]+)\(([^)]+)\)', part)
+        if match:
+            op = match.group(1)
+            args = [a.strip() for a in match.group(2).split(',')]
+            steps.append((op, args))
+    return steps
+
+
+def execute_program_with_trace(program: str) -> tuple:
+    """Execute program and return (trace_lines, final_result)"""
+    steps = parse_program(program)
+    results = {}
+    trace_lines = []
+
+    for i, (op, args) in enumerate(steps):
+        # Resolve arguments
+        resolved = []
+        for arg in args:
+            if arg.startswith('#'):
+                ref_idx = int(arg[1:])
+                resolved.append(results.get(ref_idx, 0))
+            elif arg.startswith('const_'):
+                const_val = int(arg.replace('const_', ''))
+                resolved.append(const_val)
+            elif arg.endswith('%'):
+                resolved.append(float(arg[:-1]) / 100)
+            else:
+                try:
+                    resolved.append(float(arg))
+                except:
+                    resolved.append(arg)
+
+        # Execute operation
+        result = None
+        if op == 'add' and len(resolved) == 2:
+            result = resolved[0] + resolved[1]
+        elif op == 'subtract' and len(resolved) == 2:
+            result = resolved[0] - resolved[1]
+        elif op == 'multiply' and len(resolved) == 2:
+            result = resolved[0] * resolved[1]
+        elif op == 'divide' and len(resolved) == 2 and resolved[1] != 0:
+            result = resolved[0] / resolved[1]
+        elif op == 'greater' and len(resolved) == 2:
+            result = 'yes' if resolved[0] > resolved[1] else 'no'
+        elif op == 'exp' and len(resolved) == 2:
+            result = resolved[0] ** resolved[1]
+
+        if result is not None:
+            results[i] = result
+            args_str = ', '.join(str(a) for a in args)
+            if isinstance(result, float):
+                trace_lines.append(f"Step {i+1}: {op}({args_str}) = {result:.5g}")
+            else:
+                trace_lines.append(f"Step {i+1}: {op}({args_str}) = {result}")
+
+    final_result = results.get(max(results.keys())) if results else None
+    return trace_lines, final_result
+
+
+def generate_reasoning(program: str, gold_inds: Dict[str, str] = None) -> str:
+    """Generate full reasoning trace from program and gold_inds"""
+    lines = []
+
+    # Add evidence from gold_inds
+    if gold_inds:
+        lines.append("Evidence from context:")
+        for key, value in list(gold_inds.items())[:3]:  # Limit to 3
+            # Clean up the evidence text
+            value_clean = value[:150] + "..." if len(value) > 150 else value
+            lines.append(f"  - {value_clean}")
+        lines.append("")
+
+    # Add execution trace
+    trace_lines, _ = execute_program_with_trace(program)
+    if trace_lines:
+        lines.append("Calculation:")
+        lines.extend(trace_lines)
+
+    return '\n'.join(lines)
 
 
 class ChainOfThoughtPrompt(BasePrompt):
@@ -9,14 +98,14 @@ class ChainOfThoughtPrompt(BasePrompt):
 
     SYSTEM_PROMPT_ANSWER = (
         "You are a financial expert. Given the context and question, "
-        "think step by step to solve the problem. Show your reasoning, "
-        "then provide the final numerical answer on the last line as 'Answer: <number>'."
+        "think step by step to solve the problem. First identify the relevant evidence, "
+        "then show your calculations, and provide the final numerical answer."
     )
 
     SYSTEM_PROMPT_PROGRAM = (
         "You are a financial expert. Given the context and question, "
-        "think step by step about what calculations are needed, "
-        "then write the program using the DSL. Output the program on the last line."
+        "think step by step: identify the evidence, plan the calculations, "
+        "then write the program using the DSL. Output only the program on the last line."
     )
 
     TEMPLATE_ANSWER = """Context:
@@ -104,13 +193,15 @@ Program: {program}
         return context[:self.max_context_len] + "..."
 
     def format_example(self, example: dict) -> str:
-        """Format a single CoT example."""
+        """Format a single CoT example with auto-generated reasoning."""
         context = self._truncate_context(example.get("context", ""))
 
-        # Generate reasoning from program if available
+        # Auto-generate reasoning from program and gold_inds
         program = example.get("program", "")
+        gold_inds = example.get("gold_inds", {})
+
         if program:
-            reasoning = f"The calculation requires: {program}"
+            reasoning = generate_reasoning(program, gold_inds)
         else:
             reasoning = "Extracting values and computing the result."
 

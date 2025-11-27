@@ -1,5 +1,5 @@
-# Qwen3-8B: Chain-of-Thought (2 examples), Program Synthesis
-model: "Qwen/Qwen3-8B"
+# Qwen2.5-7B: Chain-of-Thought (2 examples), Program Synthesis
+model: "Qwen/Qwen2.5-7B-Instruct"
 prompt_type: "cot"
 output_program: true
 n_shots: 2
