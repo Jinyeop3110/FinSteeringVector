@@ -276,6 +276,7 @@ def main():
     parser.add_argument("--max_samples", type=int, default=None)
     parser.add_argument("--batch_size", type=int, default=8)
     parser.add_argument("--max_tokens", type=int, default=256)
+    parser.add_argument("--max_model_len", type=int, default=None, help="Max context length for vLLM")
     parser.add_argument("--tensor_parallel", type=int, default=1)
     parser.add_argument("--output_dir", type=str, default="outputs")
     parser.add_argument("--seed", type=int, default=42)
@@ -344,6 +345,7 @@ def main():
     model = VLLMInference(
         model_name=args.model,
         tensor_parallel_size=args.tensor_parallel,
+        max_model_len=args.max_model_len,
     )
 
     # Run evaluation

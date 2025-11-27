@@ -1,10 +1,11 @@
-# Qwen2.5-7B: Vanilla (zero-shot), Direct Answer
-model: "Qwen/Qwen2.5-7B-Instruct"
+# Qwen3-8B: Vanilla (zero-shot), Direct Answer
+model: "Qwen/Qwen3-8B"
 prompt_type: "vanilla"
 output_program: false
 n_shots: 0
 max_samples: 256
 batch_size: 8
 max_tokens: 256
-tensor_parallel: 1
+tensor_parallel: 4
 seed: 42
+max_model_len: 16384

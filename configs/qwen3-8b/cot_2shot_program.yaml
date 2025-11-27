@@ -1,0 +1,11 @@
+# Qwen3-8B: Chain-of-Thought (2 examples), Program Synthesis
+model: "Qwen/Qwen3-8B"
+prompt_type: "cot"
+output_program: true
+n_shots: 2
+max_samples: 256
+batch_size: 8
+max_tokens: 512
+tensor_parallel: 4
+seed: 42
+max_model_len: 16384

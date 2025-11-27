@@ -30,6 +30,12 @@ Example programs:
 - "What is 100 divided by 50, then multiplied by 2?" → divide(100, 50), multiply(#0, 2)
 - "Is revenue (500) greater than cost (300)?" → greater(500, 300)
 - "What is the change from 100 to 150 as a percentage?" → subtract(150, 100), divide(#0, 100), multiply(#1, const_100)
+- "What is the sum of 1000 and 2500?" → add(1000, 2500)
+- "What is net income if revenue is 5000 and expenses are 3200?" → subtract(5000, 3200)
+- "What is the profit margin if profit is 800 and revenue is 4000?" → divide(800, 4000), multiply(#0, const_100)
+- "What is 15% of 2000?" → multiply(2000, 15%), divide(#0, const_100)
+- "What is the year-over-year growth from 1200 to 1500?" → subtract(1500, 1200), divide(#0, 1200), multiply(#1, const_100)
+- "What is the total in millions if the value is 5.2 million?" → multiply(5.2, const_1000000)
 """.strip()
 
 
