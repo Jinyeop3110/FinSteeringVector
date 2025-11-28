@@ -25,11 +25,11 @@ pip install -r requirements.txt
 bash scripts/download_finqa.sh
 
 # 3. Run best prompting config (CoT 3-shot)
-python run.py --config configs/qwen2.5-1.5b/cot_3shot_answer.yaml
+python run.py --config configs/qwen2.5-1.5b/cot_3shot.yaml
 
 # 4. Or run with FSV (no extra tokens needed)
 python scripts/test_steering_vector.py \
-    --steering_vector steering_vectors/layer12_3shot.pt \
+    --steering_vector steering_vectors/steering_vector_layer12_3shot_4seeds_nocontext.pt \
     --scales 0.2
 ```
 
@@ -82,9 +82,9 @@ Inference: [vLLM](https://github.com/vllm-project/vllm) for batch processing, Hu
 
 | Config | Command |
 |--------|---------|
-| Vanilla 0-shot | `python run.py --config configs/qwen2.5-1.5b/vanilla_0shot_answer.yaml` |
-| CoT 0-shot | `python run.py --config configs/qwen2.5-1.5b/cot_0shot_answer.yaml` |
-| CoT 3-shot | `python run.py --config configs/qwen2.5-1.5b/cot_3shot_answer.yaml` |
+| Vanilla 0-shot | `python run.py --config configs/qwen2.5-1.5b/vanilla_0shot.yaml` |
+| CoT 0-shot | `python run.py --config configs/qwen2.5-1.5b/cot_0shot.yaml` |
+| CoT 3-shot | `python run.py --config configs/qwen2.5-1.5b/cot_3shot.yaml` |
 
 Results saved to `outputs/{tag}_{model}_{timestamp}/`.
 
@@ -103,7 +103,7 @@ python scripts/extract_steering_vector.py \
 
 ```bash
 python scripts/test_steering_vector.py \
-    --steering_vector steering_vectors/layer12_3shot.pt \
+    --steering_vector steering_vectors/steering_vector_layer12_3shot_4seeds_nocontext.pt \
     --scales 0.0 0.1 0.2 0.5 1.0
 ```
 
