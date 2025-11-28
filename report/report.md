@@ -305,31 +305,15 @@ We evaluate FSV extracted from layers 12 and 16, applied to 0-shot prompts with 
 
 ## 4. Discussion
 
-### 4.1 Why CoT Works for Financial Reasoning
+### 4.1 CoT and Few-Shot Learning
 
-Chain-of-Thought prompting appears to activate numerical reasoning capabilities in LLMs by:
+CoT prompting provides a 3.5× improvement over vanilla prompting (29.14% vs 8.39%), demonstrating that explicit reasoning instructions are essential for financial numerical reasoning in smaller LLMs. Adding few-shot examples yields further incremental gains, with 3-shot achieving peak performance (32.08%). Beyond 3 examples, performance degrades due to context saturation (~6,605 tokens at 4-shot), suggesting a trade-off between demonstration diversity and context efficiency.
 
-1. **Decomposing complex problems**: Financial questions often require multiple extraction and computation steps. CoT encourages the model to handle these sequentially.
-
-2. **Explicit intermediate values**: By generating intermediate results, the model can verify each step before proceeding, reducing error propagation.
-
-3. **Pattern matching with demonstrations**: ICL examples provide templates for how to structure the reasoning process for financial calculations.
-
-### 4.2 The 3-Shot Sweet Spot
-
-The optimal performance at 3-shot (rather than more examples) has several potential explanations:
-
-1. **Sufficient pattern establishment**: Three diverse examples provide enough variety to demonstrate the reasoning pattern while avoiding redundancy.
-
-2. **Context efficiency trade-off**: Beyond 3-shot, the context becomes saturated with examples (~5,257 tokens at 3-shot vs. ~6,605 at 4-shot), potentially interfering with the model's ability to focus on the target problem.
-
-3. **Example interference**: At 4-shot, performance drops to 30.00%, suggesting that additional examples may introduce conflicting patterns or dilute the signal from more relevant demonstrations.
-
-### 4.3 Why α=0.2 is Optimal for Steering
+### 4.2 Why α=0.2 is Optimal for Steering
 
 The optimal scaling factor α=0.2 reflects the **small perturbation principle**: full scale (α=1.0) overshoots the target representation and destabilizes generation. Performance peaks at α=0.2 then degrades at higher scales, consistent with prior work on activation engineering (Turner et al., 2023).
 
-### 4.4 Limitations
+### 4.3 Limitations
 
 1. **Single model evaluation**: We only evaluate Qwen2.5-1.5B-Instruct. Results may differ for larger models or other architectures.
 
@@ -337,7 +321,7 @@ The optimal scaling factor α=0.2 reflects the **small perturbation principle**:
 
 3. **Answer-only extraction**: We extract only the final numerical answer, not evaluating the quality of intermediate reasoning steps.
 
-### 4.5 Future Work
+### 4.4 Future Work
 
 1. **Steering vector optimization**: Further tuning of extraction positions, layers, and scaling factors to maximize the effectiveness of Financial Steering Vectors.
 
