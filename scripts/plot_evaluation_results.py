@@ -88,8 +88,9 @@ def load_experiment_results(outputs_dir: Path, experiment_date: str = None) -> d
 
         results[exp_type].append(result)
 
-    # Sort by n_shots
+    # Sort by n_shots and filter to 0-4 shots only
     for exp_type in results:
+        results[exp_type] = [r for r in results[exp_type] if r["n_shots"] <= 4]
         results[exp_type].sort(key=lambda x: x["n_shots"])
 
     return results
@@ -97,7 +98,7 @@ def load_experiment_results(outputs_dir: Path, experiment_date: str = None) -> d
 
 def plot_accuracy_vs_shots(results: dict, output_path: Path):
     """Plot accuracy vs number of shots with error bars."""
-    fig, ax = plt.subplots(figsize=(10, 6))
+    fig, ax = plt.subplots(figsize=(6.7, 4))
 
     # CoT results
     cot_results = results["cot"]
@@ -129,8 +130,8 @@ def plot_accuracy_vs_shots(results: dict, output_path: Path):
     ax.set_title('FinQA Accuracy vs ICL Examples\n(Qwen2.5-1.5B-Instruct, 256 samples, 4 seeds)', fontsize=14)
     ax.legend(loc='lower right', fontsize=10)
     ax.grid(True, alpha=0.3)
-    ax.set_xticks(range(0, 9))
-    ax.set_xlim(-0.5, 8.5)
+    ax.set_xticks(range(0, 5))
+    ax.set_xlim(-0.5, 4.5)
 
     # Set y-axis limits with some padding
     if cot_results:
@@ -149,7 +150,7 @@ def plot_accuracy_vs_shots(results: dict, output_path: Path):
 
 def plot_latency_comparison(results: dict, output_path: Path):
     """Plot latency and token usage comparison."""
-    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+    fig, axes = plt.subplots(1, 2, figsize=(9.3, 3.3))
 
     # Combine all results
     all_results = []
@@ -219,9 +220,73 @@ def plot_latency_comparison(results: dict, output_path: Path):
     print(f"Saved latency plot to: {output_path}")
 
 
+def plot_accuracy_bar_simple(results: dict, output_path: Path):
+    """Plot simple bar chart comparing Vanilla, CoT 0-shot, and CoT 3-shot."""
+    fig, ax = plt.subplots(figsize=(5.3, 4))
+
+    # Collect data for the three conditions
+    labels = []
+    accuracies = []
+    stds = []
+    colors = []
+
+    # Vanilla 0-shot
+    vanilla_results = results["vanilla"]
+    if vanilla_results:
+        labels.append("Vanilla\n0-shot")
+        accuracies.append(vanilla_results[0]["accuracy"] * 100)
+        stds.append(vanilla_results[0]["std"] * 100)
+        colors.append('#E94F37')
+
+    # CoT 0-shot and 3-shot
+    cot_results = results["cot"]
+    for r in cot_results:
+        if r["n_shots"] == 0:
+            labels.append("CoT\n0-shot")
+            accuracies.append(r["accuracy"] * 100)
+            stds.append(r["std"] * 100)
+            colors.append('#2E86AB')
+        elif r["n_shots"] == 3:
+            labels.append("CoT\n3-shot")
+            accuracies.append(r["accuracy"] * 100)
+            stds.append(r["std"] * 100)
+            colors.append('#1B4965')
+
+    if not labels:
+        print("No data found for Vanilla, CoT 0-shot, or CoT 3-shot")
+        return
+
+    x = np.arange(len(labels))
+    width = 0.6
+
+    bars = ax.bar(x, accuracies, width, yerr=stds, capsize=8,
+                  color=colors, edgecolor='black', linewidth=1, alpha=0.85)
+
+    # Add value labels on bars
+    for bar, acc, std in zip(bars, accuracies, stds):
+        height = bar.get_height()
+        ax.text(bar.get_x() + bar.get_width()/2, height + std + 1,
+                f'{acc:.1f}%', ha='center', va='bottom', fontsize=12, fontweight='bold')
+
+    ax.set_ylabel('Execution Accuracy (%)', fontsize=12)
+    ax.set_title('FinQA Accuracy: Vanilla vs Chain-of-Thought\n(Qwen2.5-1.5B-Instruct)', fontsize=14)
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels, fontsize=11)
+    ax.set_ylim(0, max(accuracies) + max(stds) + 10)
+    ax.grid(True, alpha=0.3, axis='y')
+
+    # Add a baseline at 0
+    ax.axhline(y=0, color='black', linewidth=0.5)
+
+    plt.tight_layout()
+    plt.savefig(output_path, dpi=150, bbox_inches='tight')
+    plt.close()
+    print(f"Saved simple bar plot to: {output_path}")
+
+
 def plot_combined(results: dict, output_path: Path):
     """Create a combined figure with accuracy, latency, and efficiency."""
-    fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+    fig, axes = plt.subplots(2, 2, figsize=(9.3, 6.7))
 
     # Plot 1: Accuracy vs Shots (top-left)
     ax1 = axes[0, 0]
@@ -249,7 +314,7 @@ def plot_combined(results: dict, output_path: Path):
     ax1.set_title('(a) Accuracy vs ICL Examples', fontsize=12)
     ax1.legend(loc='lower right', fontsize=9)
     ax1.grid(True, alpha=0.3)
-    ax1.set_xticks(range(0, 9))
+    ax1.set_xticks(range(0, 5))
 
     # Plot 2: Latency vs Shots (top-right)
     ax2 = axes[0, 1]
@@ -268,7 +333,7 @@ def plot_combined(results: dict, output_path: Path):
     ax2.set_title('(b) Latency vs ICL Examples', fontsize=12)
     ax2.legend(loc='upper left', fontsize=9)
     ax2.grid(True, alpha=0.3)
-    ax2.set_xticks(range(0, 9))
+    ax2.set_xticks(range(0, 5))
 
     # Plot 3: Input Tokens vs Shots (bottom-left)
     ax3 = axes[1, 0]
@@ -291,7 +356,7 @@ def plot_combined(results: dict, output_path: Path):
     ax3.set_title('(c) Token Usage vs ICL Examples', fontsize=12)
     ax3.legend(loc='upper left', fontsize=9)
     ax3.grid(True, alpha=0.3)
-    ax3.set_xticks(range(0, 9))
+    ax3.set_xticks(range(0, 5))
 
     # Plot 4: Efficiency (Accuracy per second) (bottom-right)
     ax4 = axes[1, 1]
@@ -312,7 +377,7 @@ def plot_combined(results: dict, output_path: Path):
     ax4.set_title('(d) Efficiency (Accuracy/Latency)', fontsize=12)
     ax4.legend(loc='upper right', fontsize=9)
     ax4.grid(True, alpha=0.3)
-    ax4.set_xticks(range(0, 9))
+    ax4.set_xticks(range(0, 5))
 
     plt.suptitle('FinQA Performance Analysis: Qwen2.5-1.5B-Instruct\n(256 samples, 4 seeds per config)',
                 fontsize=14, fontweight='bold', y=1.02)
@@ -373,7 +438,7 @@ def generate_results_table(results: dict, output_path: Path):
 def main():
     parser = argparse.ArgumentParser(description="Generate plots from FinQA experiment results")
     parser.add_argument("--outputs_dir", type=str, default="outputs", help="Path to outputs directory")
-    parser.add_argument("--report_dir", type=str, default="reports", help="Path to save reports")
+    parser.add_argument("--report_dir", type=str, default="figures/1_evaluation", help="Path to save figures")
     parser.add_argument("--date", type=str, default=None, help="Filter by date (YYYYMMDD)")
     args = parser.parse_args()
 
@@ -397,6 +462,7 @@ def main():
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
     plot_accuracy_vs_shots(results, report_dir / f"accuracy_vs_shots_{timestamp}.png")
+    plot_accuracy_bar_simple(results, report_dir / f"accuracy_bar_simple_{timestamp}.png")
     plot_latency_comparison(results, report_dir / f"latency_comparison_{timestamp}.png")
     plot_combined(results, report_dir / f"combined_analysis_{timestamp}.png")
     generate_results_table(results, report_dir / f"results_{timestamp}.md")

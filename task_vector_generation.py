@@ -388,6 +388,8 @@ def compute_average_representations(
 def main():
     parser = argparse.ArgumentParser(description="Task Vector Generation for FinQA")
     parser.add_argument("--config", type=str, required=True, help="Path to config YAML")
+    parser.add_argument("--seed", type=int, default=None, help="Override seed for ICL example selection")
+    parser.add_argument("--tag", type=str, default=None, help="Override tag for session naming")
     args = parser.parse_args()
 
     # Load main config
@@ -404,6 +406,12 @@ def main():
     for key in ["model", "seed", "max_samples", "split"]:
         if key not in config and key in prompt_config:
             config[key] = prompt_config[key]
+
+    # Command line overrides
+    if args.seed is not None:
+        config["seed"] = args.seed
+    if args.tag is not None:
+        config["tag"] = args.tag
 
     # Create output directories
     base_dir = Path(__file__).parent
@@ -453,22 +461,23 @@ def main():
     # Load dataset
     split = config.get("split", "train")
     seed = config.get("seed", 42)
-    max_samples = config.get("max_samples", 256)
+    max_samples = config.get("max_samples")  # None means all samples
+    use_qa_json = prompt_config.get("use_qa_json", False) or config.get("use_qa_json", False)
 
-    dataset = FinQADataset(split=split, seed=seed)
+    dataset = FinQADataset(split=split, seed=seed, use_qa_json=use_qa_json)
     dataset.load()
-    logger.info(f"Loaded {split} dataset with {len(dataset)} examples")
+    logger.info(f"Loaded {split} dataset with {len(dataset)} examples (use_qa_json={use_qa_json})")
 
     # Load ICL pool if needed
     icl_pool = None
     n_shots = prompt_config.get("n_shots", 0)
     if prompt_type in ["few_shot", "cot"] and n_shots > 0:
-        icl_pool = FinQADataset(split="train", seed=seed)
+        icl_pool = FinQADataset(split="train", seed=seed, use_qa_json=use_qa_json)
         icl_pool.load()
         logger.info(f"Loaded train dataset with {len(icl_pool)} examples for ICL")
 
     # Prepare prompts
-    n_samples = min(max_samples, len(dataset))
+    n_samples = len(dataset) if max_samples is None else min(max_samples, len(dataset))
     prompts = []
     sample_ids = []
 

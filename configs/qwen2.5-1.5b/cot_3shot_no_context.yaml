@@ -1,12 +1,14 @@
-# Qwen2.5-1.5B: Chain-of-Thought 3-shot (3-step filtered data)
+# Qwen2.5-1.5B: Chain-of-Thought 3-shot with NO CONTEXT anywhere
+# Both ICL examples and query have no context (question only)
 model: "Qwen/Qwen2.5-1.5B-Instruct"
 prompt_type: "cot"
 output_program: false
 n_shots: 3
-n_runs: 4
+n_runs: 1
 no_context_in_examples: true
+no_context_in_query: true
 use_qa_json: true
-tag: "cot_3shot"
+tag: "cot_3shot_no_context"
 batch_size: 8
 max_tokens: 512
 tensor_parallel: 1

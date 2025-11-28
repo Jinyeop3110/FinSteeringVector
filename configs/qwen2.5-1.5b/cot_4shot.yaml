@@ -12,3 +12,4 @@ max_tokens: 512
 tensor_parallel: 1
 seed: 42
 max_model_len: 16384
+split: "all"

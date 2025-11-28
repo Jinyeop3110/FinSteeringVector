@@ -1,0 +1,23 @@
+# Task Vector Extraction: CoT 0-shot Layer 16 only
+# =================================================
+model: "Qwen/Qwen2.5-1.5B-Instruct"
+
+# Token positions to extract - at "Reasoning:" where model starts thinking
+token_positions:
+  - search: "Reasoning:"
+    offset: 0
+
+# Only layer 16 for focused analysis
+layers:
+  - 16
+
+# Prompt configuration - 0-shot CoT
+prompt_config: "configs/qwen2.5-1.5b/cot_0shot.yaml"
+
+# Dataset settings - use qa_json for all 429 samples
+split: "all"
+use_qa_json: true
+
+# Output directories
+task_vector_dir: "task_vector"
+raw_representations_dir: "raw_representations"

@@ -1,0 +1,28 @@
+# Task Vector Extraction: CoT 3-shot with FULL CONTEXT
+# =====================================================
+model: "Qwen/Qwen2.5-1.5B-Instruct"
+
+# Token positions to extract
+token_positions:
+  - "last"  # Last token of prompt
+
+# Layers to extract from (Qwen2.5-1.5B has 28 layers)
+layers:
+  - 4
+  - 8
+  - 12
+  - 16
+  - 20
+  - 24
+  - 27
+
+# Prompt configuration - uses FULL CONTEXT (pre_text + table + post_text in ICL examples)
+prompt_config: "configs/qwen2.5-1.5b/cot_3shot_full_context.yaml"
+
+# Dataset settings
+split: "test"
+max_samples: 256
+
+# Output directories
+task_vector_dir: "task_vector"
+raw_representations_dir: "raw_representations"

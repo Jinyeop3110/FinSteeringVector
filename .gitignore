@@ -3,10 +3,18 @@ data/
 
 # Outputs and results
 outputs/
+outputs_SV/
 task_vector/
 raw_representations/
+raw_representations_aligned/
+steering_vectors/
 reports/
+logs/
 *.log
+
+# Old generated files in root
+finqa_prompting_comparison.png
+finqa_prompting_comparison.pdf
 
 # Analysis (raw data and plots are generated)
 analysis/raw_data/

@@ -415,6 +415,11 @@ def main():
         help="If set, ICL examples contain table+question+reasoning+answer (no text passages)",
     )
     parser.add_argument(
+        "--no_context_in_query",
+        action="store_true",
+        help="If set, the main query contains only question (no context/table)",
+    )
+    parser.add_argument(
         "--use_qa_json",
         action="store_true",
         help="If set, load data from qa.json (merged file) instead of split-specific files",
@@ -463,6 +468,9 @@ def main():
         # Support table-only mode for ICL examples
         if getattr(args, 'table_only_in_examples', False):
             prompt_kwargs["table_only_in_examples"] = True
+        # Support no-context mode for query
+        if getattr(args, 'no_context_in_query', False):
+            prompt_kwargs["no_context_in_query"] = True
     # vanilla prompt has no extra params
 
     prompt_template = prompt_class(**prompt_kwargs)
@@ -475,12 +483,12 @@ def main():
     logger.info(f"Loaded {args.split} dataset with {len(test_dataset)} examples" +
                 (" (from qa.json)" if use_qa_json else ""))
 
-    # Load train set for ICL examples if needed
+    # Load ICL pool - use same split as test set (all examples available for ICL)
     icl_pool = None
     if args.prompt_type in ["few_shot", "cot"] and args.n_shots > 0:
-        icl_pool = FinQADataset(split="train", seed=args.seed, use_qa_json=use_qa_json)
+        icl_pool = FinQADataset(split=args.split, seed=args.seed, use_qa_json=use_qa_json)
         icl_pool.load()
-        logger.info(f"Loaded train dataset with {len(icl_pool)} examples for ICL" +
+        logger.info(f"Loaded {args.split} dataset with {len(icl_pool)} examples for ICL" +
                     (" (from qa.json)" if use_qa_json else ""))
 
     # Initialize model
@@ -561,6 +569,9 @@ def main():
 
         # Save first run's readable prompts as example
         save_prompts_readable(all_run_predictions[0], output_dir)
+
+        # Save comparison Excel for first run
+        save_comparison_excel(all_run_predictions[0], str(output_dir / "comparison_run0.xlsx"))
 
         # Summary for multiple runs
         logger.info("\n" + "=" * 60)

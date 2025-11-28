@@ -1,0 +1,19 @@
+Separation Metrics: CoT 0-shot vs CoT 3-shot
+============================================================
+
+Model: Qwen2.5-1.5B-Instruct
+Seed: 42
+0-shot dir: cot_0shot_seed42_Qwen2.5-1.5B-Instruct_task_vector_20251127_223816
+3-shot dir: cot_3shot_full_context_seed42_Qwen2.5-1.5B-Instruct_task_vector_20251127_222601
+
+Layer-wise Metrics:
+------------------------------------------------------------
+Layer      Centroid Dist   Cosine Sim   Fisher Ratio   
+------------------------------------------------------------
+4          3.4336          0.9927       0.962679       
+8          4.7070          0.9897       1.964694       
+12         6.0391          0.9897       1.972117       
+16         8.9062          0.9839       0.689641       
+20         14.1172         0.9814       0.315993       
+24         23.0469         0.9897       0.270849       
+27         28.0156         0.9868       0.187321       

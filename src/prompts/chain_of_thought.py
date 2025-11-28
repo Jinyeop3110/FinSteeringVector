@@ -383,6 +383,16 @@ For yes/no questions, answer with "yes" or "no".
 
 Reasoning:"""
 
+    TEMPLATE_NO_CONTEXT = """Context: ***
+
+Question: {question}
+
+Think step by step and show your reasoning. Then provide your final answer on a new line starting with "Answer:".
+For numerical questions, give only the number.
+For yes/no questions, answer with "yes" or "no".
+
+Reasoning:"""
+
     # Template with context (default)
     EXAMPLE_TEMPLATE = """Context:
 {context}
@@ -428,6 +438,7 @@ Answer: {answer}
         max_context_len: int = 20000,
         include_context_in_examples: bool = True,
         table_only_in_examples: bool = False,
+        no_context_in_query: bool = False,
     ):
         """
         Initialize chain-of-thought prompt.
@@ -438,12 +449,14 @@ Answer: {answer}
             max_context_len: Maximum context length per example
             include_context_in_examples: Whether to include context in ICL examples
             table_only_in_examples: Whether to include only table (no text) in ICL examples
+            no_context_in_query: Whether to exclude context from the main query
         """
         self.n_shots = n_shots
         self.include_system = include_system
         self.max_context_len = max_context_len
         self.include_context_in_examples = include_context_in_examples
         self.table_only_in_examples = table_only_in_examples
+        self.no_context_in_query = no_context_in_query
 
     def _get_system_prompt(self) -> str:
         return self.SYSTEM_PROMPT
@@ -505,7 +518,6 @@ Answer: {answer}
 
             if explanations:
                 lines.append("")
-                lines.append("Now we perform the calculations:")
 
                 for i, exp in enumerate(explanations):
                     # Get semantic explanation for why we do this step
@@ -517,15 +529,15 @@ Answer: {answer}
                         question
                     )
                     # Show semantic explanation + calculation (if available)
-                    lines.append(f"Step {i+1}: {semantic}")
+                    lines.append(semantic)
                     # Show calculation if we have one (table ops now can have calculations too)
                     if exp.get('explanation') and exp.get('result') is not None:
-                        lines.append(f"  Calculation: {exp['explanation']}")
+                        lines.append(exp['explanation'])
                     elif exp.get('is_table_op') and not exp.get('extracted_numbers'):
                         # Table op without extracted numbers - skip calculation line
                         pass
                     elif not exp.get('is_table_op'):
-                        lines.append(f"  Calculation: {exp['explanation']}")
+                        lines.append(exp['explanation'])
 
                 # Add final answer interpretation
                 final_result = explanations[-1].get('result')
@@ -667,10 +679,15 @@ Answer: {answer}
             parts.append("Now solve the following:\n")
 
         # Add the query
-        parts.append(self.TEMPLATE.format(
-            context=context,
-            question=question,
-        ))
+        if self.no_context_in_query:
+            parts.append(self.TEMPLATE_NO_CONTEXT.format(
+                question=question,
+            ))
+        else:
+            parts.append(self.TEMPLATE.format(
+                context=context,
+                question=question,
+            ))
 
         user_content = "\n".join(parts)
         return self._to_chat_format(user_content)

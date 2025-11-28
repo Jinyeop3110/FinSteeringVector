@@ -1,11 +1,11 @@
-# Qwen2.5-1.5B: Chain-of-Thought 0-shot (3-step filtered data)
+# Qwen2.5-1.5B: Chain-of-Thought 5-shot with FULL CONTEXT
 model: "Qwen/Qwen2.5-1.5B-Instruct"
 prompt_type: "cot"
 output_program: false
-n_shots: 0
+n_shots: 5
 n_runs: 1
 use_qa_json: true
-tag: "cot_0shot"
+tag: "cot_5shot_full_context"
 batch_size: 8
 max_tokens: 512
 tensor_parallel: 1
