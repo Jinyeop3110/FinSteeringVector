@@ -1,8 +1,8 @@
-# FinTaskVector
+# FinSteeringVector
 
-> Can we compress few-shot learning into a steering vector?
+> Can we compress few-shot learning into a Financial Steering Vector (FSV)?
 
-This project evaluates Chain-of-Thought prompting strategies for financial numerical reasoning on the [FinQA dataset](https://github.com/czyssrs/FinQA), and investigates whether few-shot benefits can be distilled into steering vectors.
+This project evaluates Chain-of-Thought prompting strategies for financial numerical reasoning on the [FinQA dataset](https://github.com/czyssrs/FinQA), and investigates whether few-shot benefits can be distilled into Financial Steering Vectors (FSV).
 
 ## Key Results
 
@@ -13,7 +13,7 @@ This project evaluates Chain-of-Thought prompting strategies for financial numer
 | **CoT 0-shot + FSV** | **31.00%** | **1,215** | **+1.86%** |
 | CoT 3-shot | 32.08% | 5,257 | +2.94% |
 
-**Key Finding**: Steering vectors (layer 12, scale=0.2) recover **63% of the 3-shot gain** with **zero extra tokens**.
+**Key Finding**: FSV (layer 12, scale=0.2) recovers **63% of the 3-shot gain** with **zero extra tokens**.
 
 ## Quick Start
 
@@ -27,7 +27,7 @@ bash scripts/download_finqa.sh
 # 3. Run best prompting config (CoT 3-shot)
 python run.py --config configs/qwen2.5-1.5b/cot_3shot_answer.yaml
 
-# 4. Or run with steering vector (no extra tokens needed)
+# 4. Or run with FSV (no extra tokens needed)
 python scripts/test_steering_vector.py \
     --steering_vector steering_vectors/layer12_3shot.pt \
     --scales 0.2
@@ -45,7 +45,7 @@ python scripts/test_steering_vector.py \
 ## Project Structure
 
 ```
-FinTaskVector/
+FinSteeringVector/
 ├── run.py                      # Main evaluation script
 ├── configs/                    # Experiment configurations
 │   └── qwen2.5-1.5b/          # Model-specific configs
@@ -72,7 +72,7 @@ FinTaskVector/
 
 Default: `Qwen/Qwen2.5-1.5B-Instruct` (28 layers, 1.5B parameters)
 
-Inference: [vLLM](https://github.com/vllm-project/vllm) for batch processing, HuggingFace Transformers for steering vector experiments.
+Inference: [vLLM](https://github.com/vllm-project/vllm) for batch processing, HuggingFace Transformers for FSV experiments.
 
 ---
 
@@ -88,9 +88,9 @@ Inference: [vLLM](https://github.com/vllm-project/vllm) for batch processing, Hu
 
 Results saved to `outputs/{tag}_{model}_{timestamp}/`.
 
-### Steering Vector Pipeline
+### FSV Pipeline
 
-**Step 1: Extract** steering vectors from hidden state differences:
+**Step 1: Extract** FSV from hidden state differences:
 
 ```bash
 python scripts/extract_steering_vector.py \
@@ -99,7 +99,7 @@ python scripts/extract_steering_vector.py \
     --seeds 42 43 44 45
 ```
 
-**Step 2: Test** steering vectors at different scales:
+**Step 2: Test** FSV at different scales:
 
 ```bash
 python scripts/test_steering_vector.py \
@@ -125,8 +125,8 @@ outputs_SV/
 If you use this work, please cite:
 
 ```bibtex
-@misc{fintaskvector2024,
-  title={Chain-of-Thought Prompting for Financial Numerical Reasoning},
+@misc{finsteeringvector2024,
+  title={Financial Steering Vectors for Numerical Reasoning},
   author={...},
   year={2024}
 }

@@ -1,8 +1,8 @@
-# Chain-of-Thought Prompting for Financial Numerical Reasoning: An Empirical Study on the FinQA Dataset
+# Financial Steering Vectors for Numerical Reasoning: An Empirical Study on the FinQA Dataset
 
 ---
 
-> **TL;DR**: CoT prompting gives 3.5× boost over vanilla (8%→29%). Adding 3 ICL examples gains +2.9% more (→32%). Steering vectors recover 63% of that gain (+1.86%) with zero extra tokens.
+> **TL;DR**: CoT prompting gives 3.5× boost over vanilla (8%→29%). Adding 3 ICL examples gains +2.9% more (→32%). Financial Steering Vectors (FSV) recover 63% of that gain (+1.86%) with zero extra tokens.
 
 ---
 
