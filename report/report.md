@@ -40,7 +40,7 @@ In few-shot ICL, the prompt contains k input-output pairs (demonstrations) follo
 
 ### 2.2 Steering Vectors and Activation Engineering
 
-Steering vectors, introduced by Turner et al. (2023), provide a method to control model behavior by directly modifying intermediate activations during inference. The core technique, called Activation Addition (ActAdd), works by:
+Steering vectors, introduced by Turner et al. (2023), provide a method to control model behavior by directly modifying intermediate activations during inference ([detailed introduction](https://www.alignmentforum.org/posts/3ghj8EuKzwD3MQR5G/an-introduction-to-representation-engineering-an-activation)). The core technique, called Activation Addition (ActAdd), works by:
 
 1. **Computing a steering vector**: Run the model on two contrasting prompts (e.g., with vs. without few-shot examples) and compute the difference in hidden state activations at a specific layer.
 2. **Applying the vector**: During inference on new inputs, add the steering vector (scaled by factor α) to the model's hidden states at the chosen layer.
