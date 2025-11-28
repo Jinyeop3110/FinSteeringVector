@@ -247,10 +247,10 @@ Table 1 presents the answer accuracy across all prompting configurations. We eva
 | **CoT** | **3** | **32.08%** | **±0.91%** | 93.3 | 5,257 |
 | CoT | 4 | 30.00% | ±0.85% | 97.1 | 6,605 |
 
-![Accuracy vs. N-shots for Chain-of-Thought prompting](figures/1_evaluation/accuracy_vs_shots_20251128_102739.png)
+![Accuracy vs. N-shots for Chain-of-Thought prompting](../figures/1_evaluation/accuracy_vs_shots_20251128_102739.png)
 *Figure 1: Accuracy as a function of the number of in-context examples. Error bars indicate ±1 standard deviation across 4 random seeds.*
 
-![Latency comparison across prompting configurations](figures/1_evaluation/latency_comparison_20251128_102739.png)
+![Latency comparison across prompting configurations](../figures/1_evaluation/latency_comparison_20251128_102739.png)
 *Figure 2: Latency and input token count across prompting configurations. Left: Average latency per sample. Right: Average input tokens per prompt.*
 
 #### 3.1.1 Key Findings
@@ -290,7 +290,7 @@ We evaluate FSV extracted from layers 12 and 16, applied to 0-shot prompts with 
 | 16 | 1.0 | 28.7% | -0.7% |
 | - | 3-shot | 32.1% | +2.7% |
 
-![FSV Performance vs Scaling Factor](figures/2_steering_vector/fsv_combined_20251128_134441.png)
+![FSV Performance vs Scaling Factor](../figures/2_steering_vector/fsv_combined_20251128_134441.png)
 *Figure 3: FSV accuracy vs scaling factor. Layer 12 at α=0.2 recovers 63% of the 3-shot gain.*
 
 #### Key Findings
