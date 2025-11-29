@@ -53,7 +53,7 @@ This approach offers a key advantage: it can potentially replicate the effect of
 
 ### 3.1 Dataset
 
-We use the FinQA dataset (Chen et al., 2021), which contains financial QA pairs derived from S&P 500 companies' earnings reports. Each sample includes:
+We use the [FinQA dataset](https://finqasite.github.io) (Chen et al., 2021), which contains financial QA pairs derived from S&P 500 companies' earnings reports. Each sample includes:
 
 - **Financial tables**: Structured numerical data (revenue, expenses, percentages, etc.)
 - **Text context**: Surrounding paragraphs from the financial report
